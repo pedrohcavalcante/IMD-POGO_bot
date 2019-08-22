@@ -69,7 +69,42 @@ def raid(update, context):
 
     """
     update.message.reply_text(raidText)
+
+def info(update, context):
+    """Send a message when the command /help is issued."""
+    infoText="""
+IMD_POGO_BOT
+Versão: Alpha0.1
+
+Este bot foi criado para ajudar a organização do grupo de pokemon go do IMD.
+
+Quer ajudar no desenvolvimento? Entre no grupo de desenvolvimento https://t.me/joinchat/LrZ0NAvToUjayFW7X11xqA.
+
+Repositório:
+ssh: git@github.com:GuiEgle/IMD-POGO_bot.git
+https: https://github.com/GuiEgle/IMD-POGO_bot.git
+
+IMPORTANTE(dicas de uso):
+Os comandos vão funcionar melhor se executados em linhas ISOLADAS.
+O bot ainda está em desenvolvimento caso você execute um comando e ele aparentemente falhou, evite repetir.
+
+Sobre o estado atual do bot:
+O bot ainda está sendo hosteado em um computador pessoal, o de @GuiEgle, isso significa que ele só funciona se o computador estiver executando o processo responsável pelo bot. Como ele ainda está em desenvolvimento, o processo tera de ser reiniciado várias vezes, o que implica no desligamento do bot.
+
+O bot não está com memória persistente, logo sempre que reiniciado os grupos de times serão esquecidos(IMPORTANTE).
+
+Encontrou um problema?
+Você pode entrar em contato com @GuiEgle, @TONHAUNM ou @ppaulo_hh.
+Ou mande um email para guiegle@hotmail.com.
+
+Para começar digite "/help".
+
+É isso, bom proveito!
+    """
+    update.message.reply_text(infoText)
+
 def planilha(update, context):
+    print(context.user_data)
     """Send a message when the command /help is issued."""
     link_planilha="""
     https://bit.ly/2M0O29N
@@ -135,13 +170,14 @@ def error(update, context):
 
 
 def main():
-
-    updater = Updater("647981294:AAHdUxrChSiecomkRcVxWZAtJWJHk1oM06g", use_context=True)
+    botToken = "647981294:AAHdUxrChSiecomkRcVxWZAtJWJHk1oM06g"
+    updater = Updater(botToken, use_context=True)
 
     dp = updater.dispatcher
 
     dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CommandHandler("help", help))
+    dp.add_handler(CommandHandler("help", help, pass_user_data=True))
+    dp.add_handler(CommandHandler("info", info, pass_user_data=True))
     dp.add_handler(CommandHandler("acordo", acordo))
     dp.add_handler(CommandHandler("raid", raid))
     dp.add_handler(CommandHandler("planilha", planilha))
@@ -156,7 +192,6 @@ def main():
 
     # Start the Bot
     updater.start_polling()
-
     # Block until the user presses Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
     # start_polling() is non-blocking and will stop the bot gracefully.
