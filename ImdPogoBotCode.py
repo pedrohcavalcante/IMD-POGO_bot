@@ -30,7 +30,7 @@ def help(update, context):
     /planilha : planilha de informações dos membros;
     /time (azul, vermelho, amarelo) : marca todos os membros do time;
     /entrar (azul, vermelho, amarelo) (SUA TAG) : adiciona sua tag ao time;
-    /flys : Desenvolvendo;
+    /info : Informações do bot, (TEXTÃO, evite usar);
     """
     update.message.reply_text(helpText)
 
