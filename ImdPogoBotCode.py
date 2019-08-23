@@ -1,4 +1,5 @@
 import logging
+import random
 from uuid import uuid4
 
 from telegram import InlineQueryResultArticle, ParseMode, \
@@ -7,9 +8,23 @@ from telegram.ext import Updater, InlineQueryHandler, CommandHandler
 from telegram.utils.helpers import escape_markdown
 
 
-azul =[]
+docAzul = open("azul.txt","r+")
+docAmarelo = open("amarelo.txt","r+")
+docVermelho = open("vermelho.txt","r+")
+
+azul = []
 vermelho =[]
 amarelo =[]
+
+raids = []
+raid_ids=[]
+raidText="""
+🔰 RAID LEVEL {}
+🐣 Chefe: {}
+⏳ Hora: {}
+🏟 Gym: {}
+🌎 Local: {}
+"""
 
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -17,24 +32,56 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
+def my_debug(update):
+    print(update.message.from_user.username)
+    print(update.message.text)
+
+def azul_seting():
+    linhas = docAzul.readlines()
+    palavras=[]
+    for linha in linhas:
+        palavras = linha.split()
+    for palavra in palavras:
+        azul.append(" "+str(palavra))
+def vermelho_seting():
+    linhas = docVermelho.readlines()
+    palavras=[]
+    for linha in linhas:
+        palavras = linha.split()
+    for palavra in palavras:
+        vermelho.append(" "+str(palavra))
+def amarelo_seting():
+    linhas = docAmarelo.readlines()
+    palavras=[]
+    for linha in linhas:
+        palavras = linha.split()
+    for palavra in palavras:
+        amarelo.append(" "+str(palavra))
+
 def start(update, context):
+    my_debug(update)
     """Send a message when the command /start is issued."""
     update.message.reply_text('Hi!')
 
 
 def help(update, context):
+    my_debug(update)
     """Send a message when the command /help is issued."""
     helpText="""
-    /raid : Lista de raid;
+    /raid (new, chefe, hora, gym, local): inicia uma nova raid e retorna um RAID ID;
+    /entrar RAID ID, entra na raid;
+    /sair RAID ID, sai da raid;
     /acordo : TEXTÃO do acordo;
     /planilha : planilha de informações dos membros;
     /time (azul, vermelho, amarelo) : marca todos os membros do time;
-    /entrar (azul, vermelho, amarelo) (SUA TAG) : adiciona sua tag ao time;
+    /adicionar (SUA TAG) (azul, vermelho, amarelo) : adiciona sua tag ao time;
+    /remover (SUA TAG) (azul, vermelho, amarelo) : remove sua tag do time;
     /info : Informações do bot, (TEXTÃO, evite usar);
     """
     update.message.reply_text(helpText)
 
 def acordo(update, context):
+    my_debug(update)
     """Send a message when the command /start is issued."""
     acordoText="""
     Nós também temos um acordo de rodízio no ginásio que DEVE ser respeitada pelos membros do grupo (vide planilha):
@@ -56,21 +103,19 @@ Recomendações para melhor proveito do acordo:
 
 
 def raid(update, context):
-    """Send a message when the command /help is issued."""
-    raidText="""
-    🔰 RAID LEVEL ?
-🐣 Chefe: ?
-⏳ Hora: ?
-🏟 Gym: ?
-🌎 Local: ?
-
-1. ?
-2.
-
-    """
-    update.message.reply_text(raidText)
+    my_debug(update)
+    RAID_ID = random.randint(0, 10000)
+    while RAID_ID in raid_ids:
+        RAID_ID = random.randint(0, 10000)
+    else:
+        raid_ids.append(RAID_ID)
+    thisRaidText = raidText.format(context.args[0], context.args[1], context.args[2], context.args[3], context.args[4])
+    raids.append([RAID_ID, context.args[0], context.args[1], context.args[2], context.args[3], context.args[4], thisRaidText, 1])
+    update.message.reply_text(thisRaidText)
+    update.message.reply_text("RAID ID: "+str(RAID_ID))
 
 def info(update, context):
+    my_debug(update)
     """Send a message when the command /help is issued."""
     infoText="""
 IMD_POGO_BOT
@@ -103,24 +148,37 @@ Para começar digite "/help".
     """
     update.message.reply_text(infoText)
 
+
 def planilha(update, context):
-    print(context.user_data)
+    my_debug(update)
     """Send a message when the command /help is issued."""
     link_planilha="""
     https://bit.ly/2M0O29N
     """
     update.message.reply_text(link_planilha)
 
-def entrar(update, context):
+def adicionar(update, context):
+    my_debug(update)
     """Send a message when the command /help is issued."""
-    if str(context.args[0]) == "azul":
-        azul.append(context.args[1])
-    elif str(context.args[0]) == "vermelho":
-        vermelho.append(context.args[1])
-    elif str(context.args[0]) == "amarelo":
-        amarelo.append(context.args[1])
+    if str(context.args[1]) == "azul":
+        azul.append(context.args[0])
+    elif str(context.args[1]) == "vermelho":
+        vermelho.append(context.args[0])
+    elif str(context.args[1]) == "amarelo":
+        amarelo.append(context.args[0])
+
+def remover(update, context):
+    my_debug(update)
+    """Send a message when the command /help is issued."""
+    if str(context.args[1]) == "azul":
+        azul.remove(context.args[0])
+    elif str(context.args[1]) == "vermelho":
+        vermelho.remove(context.args[0])
+    elif str(context.args[1]) == "amarelo":
+        amarelo.remove(context.args[0])
 
 def time(update, context):
+    my_debug(update)
     saida = ""
     if context.args[0] == "azul":
         for membro in azul:
@@ -133,10 +191,18 @@ def time(update, context):
             saida += " {}".format(str(membro))
     update.message.reply_text(saida)
 
+def entrar(update, context):
+    my_debug(update)
+    for raid in raids:
+        if str(raid[0])==str(context.args[0]):
+            raid[6] += "\n{}. {}".format(raid[7], update.message.from_user.username)
+            raid[7]+=1
+            update.message.reply_text(raid[6])
+
+
 def sair(update, context):
-    """Send a message when the command /help is issued."""
-    for arg in context.args:
-        update.message.reply_text(arg)
+    my_debug(update)
+
 
 
 def inlinequery(update, context):
@@ -179,10 +245,12 @@ def main():
     dp.add_handler(CommandHandler("help", help, pass_user_data=True))
     dp.add_handler(CommandHandler("info", info, pass_user_data=True))
     dp.add_handler(CommandHandler("acordo", acordo))
-    dp.add_handler(CommandHandler("raid", raid))
+    dp.add_handler(CommandHandler("raid", raid, pass_args=True))
     dp.add_handler(CommandHandler("planilha", planilha))
-    dp.add_handler(CommandHandler("entrar", entrar, pass_args=True))
+    dp.add_handler(CommandHandler("adicionar", adicionar, pass_args=True))
+    dp.add_handler(CommandHandler("remover", remover, pass_args=True))
     dp.add_handler(CommandHandler("time", time, pass_args=True))
+    dp.add_handler(CommandHandler("entrar", entrar, pass_args=True))
     dp.add_handler(CommandHandler("sair", sair, pass_args=True))
 
     dp.add_handler(InlineQueryHandler(inlinequery))
@@ -199,4 +267,7 @@ def main():
 
 
 if __name__ == '__main__':
+    azul_seting()
+    amarelo_seting()
+    vermelho_seting()
     main()
