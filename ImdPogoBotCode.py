@@ -68,9 +68,9 @@ def help(update, context):
     my_debug(update)
     """Send a message when the command /help is issued."""
     helpText="""
-    /raid (new, chefe, hora, gym, local): inicia uma nova raid e retorna um RAID ID;
-    /entrar RAID ID, entra na raid;
-    /sair RAID ID, sai da raid;
+    /raid (chefe, hora, gym, local): inicia uma nova raid e retorna um RAID ID;
+    /entrar (RAID ID), entra na raid;
+    /sair (RAID ID), sai da raid[NÃO FUNCIONA AINDA];
     /acordo : TEXTÃO do acordo;
     /planilha : planilha de informações dos membros;
     /time (azul, vermelho, amarelo) : marca todos os membros do time;
